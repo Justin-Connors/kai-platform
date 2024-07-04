@@ -68,12 +68,12 @@ const Message = forwardRef((props, ref) => {
     }, 20 * characters.length);
   }, []);
 
-  useEffect(() => {
-    if (fullyScrolled)
-      ref.current?.scrollTo(0, ref.current?.scrollHeight, {
-        behavior: 'smooth',
-      });
-  }, [message]);
+  // useEffect(() => {
+  //   if (fullyScrolled)
+  //     ref.current?.scrollTo(0, ref.current?.scrollHeight, {
+  //       behavior: 'smooth',
+  //     });
+  // }, [message]);
 
   const renderStreamableMessage = () => {
     return (

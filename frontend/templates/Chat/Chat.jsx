@@ -1,10 +1,11 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 import {
   ArrowDownwardOutlined,
   InfoOutlined,
   Settings,
 } from '@mui/icons-material';
+
 import {
   Button,
   Fade,
@@ -14,6 +15,7 @@ import {
   TextField,
   Typography,
 } from '@mui/material';
+
 import { collection, onSnapshot, query, where } from 'firebase/firestore';
 
 import { useDispatch, useSelector } from 'react-redux';
@@ -23,8 +25,11 @@ import NavigationIcon from '@/assets/svg/Navigation.svg';
 import { MESSAGE_ROLE, MESSAGE_TYPES } from '@/constants/bots';
 
 import CenterChatContentNoMessages from './CenterChatContentNoMessages';
+
 import ChatSpinner from './ChatSpinner';
+
 import Message from './Message';
+
 import styles from './styles';
 
 import {
@@ -46,7 +51,87 @@ import createChatSession from '@/services/chatbot/createChatSession';
 import sendMessage from '@/services/chatbot/sendMessage';
 
 const ChatInterface = () => {
+  const initialChatData = [
+    [], // Chat 1 (empty to start with)
+    [
+      {
+        id: 1,
+        role: MESSAGE_ROLE.AI,
+        type: MESSAGE_TYPES.TEXT,
+        payload: {
+          text: 'Hello! How can I assist you today?',
+        },
+      },
+      {
+        id: 2,
+        role: MESSAGE_ROLE.HUMAN,
+        type: MESSAGE_TYPES.TEXT,
+        payload: {
+          text: 'I need help with my mathematics assignment.',
+        },
+      },
+      {
+        id: 3,
+        role: MESSAGE_ROLE.AI,
+        type: MESSAGE_TYPES.TEXT,
+        payload: {
+          text: 'Sure, I can assist you with that.',
+        },
+      },
+    ],
+    [
+      {
+        id: 4,
+        role: MESSAGE_ROLE.AI,
+        type: MESSAGE_TYPES.TEXT,
+        payload: {
+          text: 'Welcome back! What is it that you need help with today?',
+        },
+      },
+      {
+        id: 5,
+        role: MESSAGE_ROLE.HUMAN,
+        type: MESSAGE_TYPES.TEXT,
+        payload: {
+          text: 'I want to change my account settings.',
+        },
+      },
+      {
+        id: 6,
+        role: MESSAGE_ROLE.AI,
+        type: MESSAGE_TYPES.TEXT,
+        payload: {
+          text: 'Let me guide you through the process.',
+        },
+      },
+    ],
+  ];
+
   const messagesContainerRef = useRef();
+
+  const [currentChatIndex, setCurrentChatIndex] = useState(-1); // Start with no chat selected
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatData, setChatData] = useState(initialChatData);
+
+  const handleSwitchChat = (index) => {
+    setCurrentChatIndex(index);
+    setChatMessages(chatData[index]);
+  };
+
+  const handleCreateChat = () => {
+    const newChatData = [...chatData, []]; // Add a new empty chat array
+    const newIndex = newChatData.length - 1; // Index of the new chat
+
+    setChatData(newChatData);
+    setCurrentChatIndex(newIndex);
+    setChatMessages(newChatData[newIndex]);
+  };
+
+  useEffect(() => {
+    if (currentChatIndex !== -1) {
+      setChatMessages(chatData[currentChatIndex]);
+    }
+  }, [currentChatIndex, chatData]);
 
   const dispatch = useDispatch();
   const {
@@ -67,7 +152,7 @@ const ChatInterface = () => {
   const sessionId = localStorage.getItem('sessionId');
 
   const currentSession = chat;
-  const chatMessages = currentSession?.messages;
+  // const chatMessages = currentSession?.messages;
   const showNewMessageIndicator = !fullyScrolled && streamingDone;
 
   const startConversation = async (message) => {
@@ -174,10 +259,51 @@ const ChatInterface = () => {
 
     dispatch(setStreamingDone(false));
   };
+  const simulateAIResponse = () => {
+    setTimeout(() => {
+      const updatedChatData = [...chatData];
+      updatedChatData[currentChatIndex].push({
+        id: updatedChatData[currentChatIndex].length + 1,
+        role: MESSAGE_ROLE.AI,
+        type: MESSAGE_TYPES.TEXT,
+        payload: {
+          text: 'Sure, I can assist you with that.',
+        },
+      });
+      setChatData(updatedChatData);
+    }, 1000); // Simulate AI typing delay
+  };
+  const simulateSendMessage = async (message) => {
+    // Ensure currentChatIndex is valid
+    if (currentChatIndex === -1 || currentChatIndex >= chatData.length) {
+      console.error('Invalid chat index');
+      return;
+    }
+
+    // Simulate sending message and updating local chat data
+    const updatedChatData = [...chatData];
+
+    // Ensure currentChatIndex has a valid array to push into
+    if (!updatedChatData[currentChatIndex]) {
+      updatedChatData[currentChatIndex] = [];
+    }
+
+    updatedChatData[currentChatIndex].push({
+      id: updatedChatData[currentChatIndex].length + 1,
+      role: MESSAGE_ROLE.HUMAN,
+      type: MESSAGE_TYPES.TEXT,
+      payload: {
+        text: message.payload.text,
+      },
+    });
+
+    setChatData(updatedChatData);
+
+    // Simulate AI response (replace with actual backend integration)
+    simulateAIResponse();
+  };
 
   const handleSendMessage = async () => {
-    dispatch(setStreaming(true));
-
     if (!input) {
       dispatch(setError('Please enter a message'));
       setTimeout(() => {
@@ -194,26 +320,15 @@ const ChatInterface = () => {
       },
     };
 
-    if (!chatMessages) {
-      await startConversation(message);
-      return;
-    }
+    dispatch(setMessages({ role: MESSAGE_ROLE.HUMAN }));
 
-    dispatch(
-      setMessages({
-        role: MESSAGE_ROLE.HUMAN,
-      })
-    );
+    // Simulate sending message (you can replace with actual backend integration later)
+    await simulateSendMessage(message);
 
-    dispatch(setTyping(true));
-
-    await sendMessage({ message, id: sessionId }, dispatch);
+    dispatch(setInput('')); // Clear input after sending
   };
 
-  const handleQuickReply = async (option) => {
-    dispatch(setInput(option));
-    dispatch(setStreaming(true));
-
+  const simulateQuickReply = async (option) => {
     const message = {
       role: MESSAGE_ROLE.HUMAN,
       type: MESSAGE_TYPES.QUICK_REPLY,
@@ -222,17 +337,41 @@ const ChatInterface = () => {
       },
     };
 
-    dispatch(
-      setMessages({
-        role: MESSAGE_ROLE.HUMAN,
-      })
-    );
-    dispatch(setTyping(true));
-
-    await sendMessage({ message, id: currentSession?.id }, dispatch);
+    // Simulate sending message and updating local chat data
+    await simulateSendMessage(message);
   };
 
-  /* Push Enter */
+  const handleQuickReply = async (option) => {
+    dispatch(setInput(option));
+    dispatch(setMessages({ role: MESSAGE_ROLE.HUMAN }));
+
+    // Simulate sending quick reply (you can replace with actual backend integration later)
+    await simulateQuickReply(option);
+  };
+
+  // TODO
+  // const handleQuickReply = async (option) => {
+  //   dispatch(setInput(option));
+  //   dispatch(setStreaming(true));
+
+  //   const message = {
+  //     role: MESSAGE_ROLE.HUMAN,
+  //     type: MESSAGE_TYPES.QUICK_REPLY,
+  //     payload: {
+  //       text: option,
+  //     },
+  //   };
+
+  //   dispatch(
+  //     setMessages({
+  //       role: MESSAGE_ROLE.HUMAN,
+  //     })
+  //   );
+  //   dispatch(setTyping(true));
+
+  //   await sendMessage({ message, id: currentSession?.id }, dispatch);
+  // };
+
   const keyDownHandler = async (e) => {
     if (typing || !input || streaming) return;
     if (e.keyCode === 13) handleSendMessage();
@@ -272,13 +411,65 @@ const ChatInterface = () => {
     );
   };
 
+  const renderSwitchButtons = () => {
+    return (
+      <Grid
+        container
+        spacing={2}
+        justifyContent="center"
+        wrap="nowrap"
+        // eslint-disable-next-line prettier/prettier
+      sx={{ overflowX: 'auto', maxWidth: '100%' }}
+      >
+        {chatData.map((_chat, index) => (
+          <Grid item key={index}>
+            <Button
+              variant={index === currentChatIndex ? 'contained' : 'outlined'}
+              color="primary"
+              onClick={() => handleSwitchChat(index)}
+              sx={{
+                backgroundColor:
+                  index === currentChatIndex ? '#1976d2' : '#ffffff',
+                color: '#000000',
+                '&:hover': {
+                  backgroundColor:
+                    index === currentChatIndex ? '#1565c0' : '#f0f0f0',
+                  color: '#000000',
+                },
+              }}
+            >
+              Chat {index + 1}
+            </Button>
+          </Grid>
+        ))}
+        <Grid item>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleCreateChat}
+            sx={{
+              backgroundColor: '#ffffff',
+              color: '#000000',
+              '&:hover': {
+                backgroundColor: '#1565c0',
+                color: '#000000', // Black text color on hover
+              },
+            }}
+          >
+            Create New Chat
+          </Button>
+        </Grid>
+      </Grid>
+    );
+  };
+
   const renderCenterChatContent = () => {
     if (
       !openSettingsChat &&
       !infoChatOpened &&
       chatMessages?.length !== 0 &&
       !!chatMessages
-    )
+    ) {
       return (
         <Grid
           onClick={() => dispatch(setMore({ role: 'shutdown' }))}
@@ -289,25 +480,22 @@ const ChatInterface = () => {
             onScroll={handleOnScroll}
             {...styles.centerChat.messagesGridProps}
           >
-            {chatMessages?.map(
-              (message, index) =>
-                message?.role !== MESSAGE_ROLE.SYSTEM && (
-                  <Message
-                    ref={messagesContainerRef}
-                    {...message}
-                    messagesLength={chatMessages?.length}
-                    messageNo={index + 1}
-                    onQuickReply={handleQuickReply}
-                    streaming={streaming}
-                    fullyScrolled={fullyScrolled}
-                    key={index}
-                  />
-                )
-            )}
+            {chatMessages.map((message, index) => (
+              <Message
+                key={index}
+                {...message}
+                messagesLength={chatMessages.length}
+                messageNo={index + 1}
+                onQuickReply={handleQuickReply}
+                streaming={streaming}
+                fullyScrolled={fullyScrolled}
+              />
+            ))}
             {typing && <ChatSpinner />}
           </Grid>
         </Grid>
       );
+    }
 
     return null;
   };
@@ -358,6 +546,7 @@ const ChatInterface = () => {
 
   return (
     <Grid {...styles.mainGridProps}>
+      {renderSwitchButtons()}
       {renderMoreChat()}
       {renderCenterChatContent()}
       {renderCenterChatContentNoMessages()}
