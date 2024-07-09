@@ -2,8 +2,7 @@
   "extends": [
     "next",
     "next/core-web-vitals",
-    "next/babel",
-    "airbnb",
+    "airbnb",             
     "eslint:recommended",
     "plugin:prettier/recommended",
     "plugin:react-hooks/recommended",

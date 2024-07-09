@@ -320,8 +320,8 @@ const ChatInterface = () => {
   };
 
   const renderChatHistory = () => {
-      return <ChatHistory />;
-  }
+    return <ChatHistory />;
+  };
 
   const renderNewMessageIndicator = () => {
     return (

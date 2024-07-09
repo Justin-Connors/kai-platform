@@ -1,22 +1,22 @@
 import React, { useState } from 'react';
+
+import Divider from '@mui/material/Divider';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
-import Divider from '@mui/material/Divider';
-import Typography  from '@mui/material/Typography';
+import Typography from '@mui/material/Typography';
 
 import styles from './styles';
 
 const ChatHistory = () => {
-
   const [hoveredItem, setHoveredItem] = useState(null);
 
   // Test Data
   const chatHistory = [
-    { date: 'Today', title: 'test title 1'},
-    { date: 'Today', title: 'test title 2'},
-    { date: 'Yesterday', title: 'test title 3'},
-    { date: 'June 5th, 2024', title: 'test title 4'},
+    { date: 'Today', title: 'test title 1' },
+    { date: 'Today', title: 'test title 2' },
+    { date: 'Yesterday', title: 'test title 3' },
+    { date: 'June 5th, 2024', title: 'test title 4' },
   ];
 
   return (
@@ -32,9 +32,9 @@ const ChatHistory = () => {
             onMouseEnter={() => setHoveredItem(index)}
             onMouseLeave={() => setHoveredItem(null)}
           >
-            <ListItemText 
-              primary={item.title} 
-              sx={hoveredItem === index ? styles.listItemHover : null} 
+            <ListItemText
+              primary={item.title}
+              sx={hoveredItem === index ? styles.listItemHover : null}
             />
           </ListItemButton>
           <Divider {...styles.divider} />
