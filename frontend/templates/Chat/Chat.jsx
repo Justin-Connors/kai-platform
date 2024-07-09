@@ -23,6 +23,7 @@ import NavigationIcon from '@/assets/svg/Navigation.svg';
 import { MESSAGE_ROLE, MESSAGE_TYPES } from '@/constants/bots';
 
 import CenterChatContentNoMessages from './CenterChatContentNoMessages';
+import ChatHistory from './ChatHistory';
 import ChatSpinner from './ChatSpinner';
 import Message from './Message';
 import styles from './styles';
@@ -318,6 +319,10 @@ const ChatInterface = () => {
     return null;
   };
 
+  const renderChatHistory = () => {
+      return <ChatHistory />;
+  }
+
   const renderNewMessageIndicator = () => {
     return (
       <Fade in={showNewMessageIndicator}>
@@ -361,6 +366,7 @@ const ChatInterface = () => {
       {renderMoreChat()}
       {renderCenterChatContent()}
       {renderCenterChatContentNoMessages()}
+      {renderChatHistory()}
       {renderNewMessageIndicator()}
       {renderBottomChatContent()}
     </Grid>
