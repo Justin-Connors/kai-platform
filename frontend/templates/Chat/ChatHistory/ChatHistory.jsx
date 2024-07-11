@@ -1,5 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
 import ChatIcon from '@mui/icons-material/Chat';
 import { Drawer, IconButton } from '@mui/material';
 import Divider from '@mui/material/Divider';
@@ -7,11 +9,8 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Typography from '@mui/material/Typography';
-import ArrowDropUpIcon from '@mui/icons-material/ArrowDropUp';
-import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
 
 import styles from './styles';
-import { ArrowDropUp } from '@mui/icons-material';
 
 const ChatHistory = () => {
   const [hoveredItem, setHoveredItem] = useState(null);
