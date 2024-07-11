@@ -1,4 +1,4 @@
-// #9983e3 - Purple color code
+// #9983e3 - Purple highlight text color code
 const styles = {
   historyItem: {
     fontSize: '0.75rem',
